@@ -1,0 +1,50 @@
+[gd_scene load_steps=9 format=3 uid="uid://cl31ohlye2c1u"]
+
+[ext_resource type="Script" path="res://scenes/unit/Unit.gd" id="1_ekfed"]
+[ext_resource type="Texture2D" uid="uid://l4w07tfhdute" path="res://textures/spriteSheet.png" id="2_1od2w"]
+[ext_resource type="Script" path="res://scenes/unit/Soldier.gd" id="3_m1ra3"]
+[ext_resource type="Script" path="res://scenes/unit/Officer.gd" id="4_jbqja"]
+[ext_resource type="Script" path="res://scenes/unit/Medic.gd" id="5_sf2bu"]
+[ext_resource type="Script" path="res://scenes/unit/move.gd" id="6_rgxfi"]
+[ext_resource type="Script" path="res://scenes/unit/MainItem.gd" id="7_453ct"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ga5rc"]
+size = Vector2(64, 64)
+
+[node name="Unit" type="CharacterBody2D"]
+script = ExtResource("1_ekfed")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ga5rc")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_1od2w")
+hframes = 8
+vframes = 8
+
+[node name="UnitClass" type="Node" parent="."]
+
+[node name="Soldier" type="Node" parent="UnitClass"]
+script = ExtResource("3_m1ra3")
+
+[node name="Officer" type="Node" parent="UnitClass"]
+script = ExtResource("4_jbqja")
+
+[node name="Medic" type="Node" parent="UnitClass"]
+script = ExtResource("5_sf2bu")
+
+[node name="State" type="Node" parent="."]
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Actions" type="Node" parent="."]
+
+[node name="Move" type="Node" parent="Actions"]
+script = ExtResource("6_rgxfi")
+
+[node name="Fire" type="Node" parent="Actions"]
+script = ExtResource("7_453ct")
+
+[connection signal="action_started" from="Actions/Move" to="." method="_on_action_started"]
