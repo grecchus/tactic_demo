@@ -58,6 +58,8 @@ func get_item(item_index : int):
 			weapon_obj = Item.new()
 		gv.Weapon.ARMED:
 			weapon_obj = Carabine.new()
+	if(weapon_obj != null):
+		weapon_obj.owner_unit = self
 
 
 func find_path(coords : Vector2i) -> int:
