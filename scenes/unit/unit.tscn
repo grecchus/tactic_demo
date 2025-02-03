@@ -46,5 +46,3 @@ script = ExtResource("6_rgxfi")
 
 [node name="Use" type="Node" parent="Actions"]
 script = ExtResource("7_453ct")
-
-[connection signal="action_started" from="Actions/Move" to="." method="_on_action_started"]

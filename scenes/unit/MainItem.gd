@@ -8,3 +8,4 @@ func perform(target_pos = null) -> void:
 	if(target_pos != null):
 		item._use_item(target_pos)
 	else: item._use_item()
+	get_owner()._on_action_started(1,false)

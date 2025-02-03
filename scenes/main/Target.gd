@@ -1,7 +1,7 @@
 extends Node
 
 @onready var main = get_node("/root/Main")
-@onready var tm = get_node("/root/Main/TileMap")
+@onready var tm = get_node("/root/Main/TileMap/Ground")
 
 var active_unit : Unit = null
 var target_unit : Unit = null
@@ -13,7 +13,7 @@ func _input_mouse_click(button_index : int, collider_info : Array, mouse_tm_pos 
 	match button_index:
 		MOUSE_BUTTON_LEFT:
 			active_unit.action(mouse_tm_pos)
-			if(active_unit.action_points == 0): main.unit_selected()
+			#if(active_unit.action_points == 0): main.unit_selected()
 			
 		MOUSE_BUTTON_MASK_RIGHT:
 			main.reset_mode()

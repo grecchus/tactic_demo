@@ -4,10 +4,13 @@ extends Node2D
 @onready var UnitPanel = get_node("UI/GameUI/BottomPanel")
 @onready var LOG = get_node("UI/GameUI/RightPanel/GameLog")
 @onready var UNITSCENE = preload("res://scenes/unit/unit.tscn")
+#Tile Map Layers
+@onready var GROUND = get_node("TileMap/Ground")
+@onready var OBSTACLES = get_node("TileMap/Obstacles")
 var astar_grid = AStarGrid2D.new()
 
 enum TILE{DEFAULT, HOVERED, CLICKED}
-enum LAYER{GROUND, MISC, OBSTACLES}
+enum TILE_MAP_LAYER{GROUND, OBSTACLES}
 
 const TILESIZE := Vector2(64.0, 64.0)
 var mapSize : Vector2i = Vector2i(36, 20)
@@ -23,10 +26,10 @@ var draw_path : Array = []
 
 signal unit_selected_signal(unit : Unit)
 
-
 #main functions
 func _ready():
-	astar_grid.region = $TileMap.get_used_rect()
+	gv.MainNodeAccess = self
+	astar_grid.region = GROUND.get_used_rect()
 	astar_grid.cell_size = TILESIZE
 	astar_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
 	astar_grid.update()
@@ -40,7 +43,7 @@ func _process(delta):
 		$SelectedLabel.text = "AP: " + str(active_unit.action_points)
 
 func _unhandled_input(event):
-	var mouse_tm_pos = $TileMap.local_to_map(get_global_mouse_position())
+	var mouse_tm_pos = GROUND.local_to_map(get_global_mouse_position())
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
@@ -49,13 +52,13 @@ func _unhandled_input(event):
 			
 			var alt = 1
 			if(collider_info.size() > 0): alt = 2
-			$TileMap.set_cell(LAYER.GROUND, mouse_tm_pos,0,Vector2i(TILE.CLICKED,0), alt)
+			GROUND.set_cell(mouse_tm_pos,0,Vector2i(TILE.CLICKED,0), alt)
 		else:
-			$TileMap.set_cell(LAYER.GROUND, mouse_tm_pos,0,Vector2i(TILE.HOVERED,0))
+			GROUND.set_cell(mouse_tm_pos,0,Vector2i(TILE.HOVERED,0))
 			
 	if(event is InputEventMouseMotion):
-		$TileMap.set_cell(LAYER.GROUND, mouse_tm_pos,0,Vector2i(TILE.HOVERED,0))
-		if(prev_mouse_pos != mouse_tm_pos): $TileMap.set_cell(LAYER.GROUND, prev_mouse_pos,0,Vector2i(TILE.DEFAULT,0))
+		GROUND.set_cell(mouse_tm_pos,0,Vector2i(TILE.HOVERED,0))
+		if(prev_mouse_pos != mouse_tm_pos): GROUND.set_cell(prev_mouse_pos,0,Vector2i(TILE.DEFAULT,0))
 			
 		MODE._input_mouse_motion(mouse_tm_pos)
 	
@@ -153,8 +156,8 @@ func _draw():
 		if(i > 5):
 			if(i > 11): color = Color("ff0000")
 			else: color = Color("0000ff")
-		var p1 : Vector2 = $TileMap.map_to_local(draw_path[i])
-		var p2 : Vector2 = $TileMap.map_to_local(draw_path[i+1])
+		var p1 : Vector2 = GROUND.map_to_local(draw_path[i])
+		var p2 : Vector2 = GROUND.map_to_local(draw_path[i+1])
 		draw_line(p1, p2, color)
 
 
@@ -164,7 +167,7 @@ func tm_to_global_position(tm_pos : Vector2i) -> Vector2:
 func astargrid_set_walls():
 	for y in mapSize.y:
 		for x in mapSize.x:
-			if($TileMap.get_cell_atlas_coords(LAYER.OBSTACLES, Vector2i(x,y)) != Vector2i(-1,-1)):
+			if(OBSTACLES.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1)):
 				astar_grid.set_point_solid(Vector2i(x,y))
 
 
@@ -193,3 +196,6 @@ func _on_item_pressed():
 	
 	draw_path = []
 	queue_redraw()
+
+func get_tm_layer(layer : int = 0) -> TileMapLayer:
+	return $TileMap.get_child(layer)

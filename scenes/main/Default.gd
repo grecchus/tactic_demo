@@ -1,7 +1,7 @@
 extends Node
 
 @onready var main = get_node("/root/Main")
-@onready var tm = get_node("/root/Main/TileMap")
+@onready var tm = get_node("/root/Main/TileMap/Ground")
 var active_unit : Unit = null
 
 

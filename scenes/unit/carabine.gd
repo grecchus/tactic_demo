@@ -3,15 +3,20 @@ extends Item
 
 var rng = RandomNumberGenerator.new()
 
-@onready var main = get_node("/root/Main")
-@onready var tm = get_node("/root/Main/TileMap")
+@onready var main : Node2D
+@onready var Ground : TileMapLayer #= get_node("/root/Main/TileMap/Ground")
+@onready var Obstacles : TileMapLayer #= get_node("/root/Main/TileMap/Obstacles")
 const DEFAULT_EFFECTIVE_RANGE : float = 5.0
 
 func _init():
 	cursor = "reticle"
+	main = gv.MainNodeAccess
+	Ground = main.get_tm_layer(0)
+	Obstacles = main.get_tm_layer(1)
+	
 
 func _use_item(coords : Vector2i = Vector2i.ZERO):
-	fire(tm.local_to_map(owner_unit.global_position), coords)
+	fire(Ground.local_to_map(owner_unit.global_position), coords)
 
 
 func get_objects_on_lof(start_pos : Vector2i, end_pos : Vector2i) -> Array:
@@ -31,12 +36,13 @@ func get_objects_on_lof(start_pos : Vector2i, end_pos : Vector2i) -> Array:
 		if(intersected_object.size() > 0):
 			var obj_rid : RID = intersected_object["rid"]
 			excluded_rids.append(obj_rid)
-			if(intersected_object["collider"] is TileMap): 
-				var atl_coords = tm.get_cell_atlas_coords(tm.get_layer_for_body_rid(obj_rid), tm.get_coords_for_body_rid(obj_rid))
-				object_tile_array.append(tm.get_coords_for_body_rid(obj_rid))
+			if(intersected_object["collider"] is TileMapLayer): 
+				var atl_coords = Obstacles.get_cell_atlas_coords(Obstacles.get_coords_for_body_rid(obj_rid))
+				#tm.get_layer_for_body_rid(obj_rid),
+				object_tile_array.append(Obstacles.get_coords_for_body_rid(obj_rid))
 				#Sprawdza czy pole jest sciana. sciany maja indeksy y od 2 do 3, poki co ic nie ma wiecej
 				if(atl_coords.y == 2 || atl_coords.y == 3): break
-			else: object_tile_array.append(tm.local_to_map(intersected_object["collider"].global_position))
+			else: object_tile_array.append(Ground.local_to_map(intersected_object["collider"].global_position))
 		else: break
 	
 	return object_tile_array
@@ -69,7 +75,7 @@ func fire(shooter_pos : Vector2i, target_pos : Vector2i):
 				return 
 			else: gv.cprint("Target missed!")
 		#TO BE CHANGED!!!
-		elif(tm.get_cell_atlas_coords(2, obj).y >= 2): gv.cprint("Hit the wall")
+		elif(Obstacles.get_cell_atlas_coords(obj).y >= 2): gv.cprint("Hit the wall")
 
 func roll_for_hit(hit_chance : float) -> bool:
 	return randf_range(0.0, 1.0) <= hit_chance/100.0

@@ -3,6 +3,7 @@ extends Node
 enum Team{NEUTRAL, BLUE, RED}
 enum Weapon{UNARMED, ARMED}
 
+var MainNodeAccess : Node2D
 var console_log : Array[String] = []
 
 var cursor_paths := {

@@ -2,7 +2,7 @@ class_name Unit
 extends CharacterBody2D
 
 @onready var main = get_node("/root/Main") 
-@onready var tilemap : TileMap = get_node("/root/Main/TileMap")
+@onready var tilemap : TileMapLayer = get_node("/root/Main/TileMap/Ground")
 
 var unit_class_str : String = ""
 var unit_class : UnitClass = null
@@ -69,15 +69,16 @@ func find_path(coords : Vector2i) -> int:
 		tilemap.local_to_map(global_position),
 		coords
 		) 
-	id_path = new_id_path.slice(1, 13)
+	id_path = new_id_path.slice(1, action_points*6+1)
 	movement_cost = ceili(float(id_path.size()) / 6.0)
 	return movement_cost
 
-func _on_action_started(action_cost : int = 1) -> void:
+func _on_action_started(action_cost : int = 1, is_continuous_action : bool = true) -> void:
 	action_points -= action_cost
-	current_action = "Move"
-	if(action_points == 0): main.unit_selected()
-	emit_signal("action_finished", false)
+	if(action_points <= 0):
+		main.unit_selected()
+	if(is_continuous_action):
+		emit_signal("action_finished", false)
 
 func take_damage(damage : int):
 	health_points = clamp(health_points - damage, 0, max_hp)
