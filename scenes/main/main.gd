@@ -7,7 +7,8 @@ extends Node2D
 #Tile Map Layers
 @onready var GROUND = get_node("TileMap/Ground")
 @onready var OBSTACLES = get_node("TileMap/Obstacles")
-var astar_grid = AStarGrid2D.new()
+var astar_grid := AStarGrid2D.new()
+var grid_offset := Vector2.ZERO 
 
 enum TILE{DEFAULT, HOVERED, CLICKED}
 enum TILE_MAP_LAYER{GROUND, OBSTACLES}
