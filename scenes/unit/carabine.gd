@@ -3,9 +3,6 @@ extends Item
 
 var rng = RandomNumberGenerator.new()
 
-@onready var main : Node2D
-@onready var Ground : TileMapLayer #= get_node("/root/Main/TileMap/Ground")
-@onready var Obstacles : TileMapLayer #= get_node("/root/Main/TileMap/Obstacles")
 const DEFAULT_EFFECTIVE_RANGE : float = 5.0
 
 func _init():
@@ -13,9 +10,10 @@ func _init():
 	main = gv.MainNodeAccess
 	Ground = main.get_tm_layer(0)
 	Obstacles = main.get_tm_layer(1)
-	
+	use_sound = load("res://SFX/carabine_shot.wav")
 
 func _use_item(coords : Vector2i = Vector2i.ZERO):
+	owner_unit.play_sound(use_sound)
 	fire(Ground.local_to_map(owner_unit.global_position), coords)
 
 

@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 @onready var main = get_node("/root/Main") 
 @onready var tilemap : TileMapLayer = get_node("/root/Main/TileMap/Ground")
+@onready var audio_player = get_node("AudioPlayer")
 
 var unit_class_str : String = ""
 var unit_class : UnitClass = null
@@ -85,3 +86,9 @@ func take_damage(damage : int):
 	if(health_points == 0): 
 		main.team_arrays[team].erase(self)
 		queue_free()
+
+func play_sound(sound : AudioStreamWAV = null):
+	audio_player.stream = sound
+	print(audio_player.stream)
+	audio_player.play()
+	#audio_player.stream = null

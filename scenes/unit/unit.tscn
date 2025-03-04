@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scenes/unit/Officer.gd" id="4_jbqja"]
 [ext_resource type="Script" path="res://scenes/unit/Medic.gd" id="5_sf2bu"]
 [ext_resource type="Script" path="res://scenes/unit/move.gd" id="6_rgxfi"]
-[ext_resource type="Script" path="res://scenes/unit/MainItem.gd" id="7_453ct"]
+[ext_resource type="Script" path="res://scenes/unit/use.gd" id="7_453ct"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ga5rc"]
 size = Vector2(64, 64)
@@ -46,3 +46,5 @@ script = ExtResource("6_rgxfi")
 
 [node name="Use" type="Node" parent="Actions"]
 script = ExtResource("7_453ct")
+
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="."]

@@ -1,7 +1,9 @@
-[gd_scene load_steps=15 format=4 uid="uid://ldg8yah0ymws"]
+[gd_scene load_steps=17 format=4 uid="uid://ldg8yah0ymws"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_o5l1d"]
 [ext_resource type="Texture2D" uid="uid://bpx7iqeb74hhb" path="res://textures/tilemaps/terrainTilemap.png" id="1_y3yfu"]
+[ext_resource type="AudioStream" uid="uid://ctoq753m0bl6e" path="res://SFX/synth (1).wav" id="2_v88ib"]
+[ext_resource type="Script" path="res://scenes/main/soundtrack_player.gd" id="3_fu2bx"]
 [ext_resource type="Script" path="res://scenes/main/turn_control.gd" id="3_psmhk"]
 [ext_resource type="Script" path="res://scenes/main/Default.gd" id="4_4ffe0"]
 [ext_resource type="Texture2D" uid="uid://l4w07tfhdute" path="res://textures/spriteSheet.png" id="4_hr8wi"]
@@ -184,6 +186,11 @@ region = Rect2(64, 0, 64, 64)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_o5l1d")
+
+[node name="SoundtrackPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_v88ib")
+volume_db = -20.0
+script = ExtResource("3_fu2bx")
 
 [node name="TileMap" type="Node2D" parent="."]
 
@@ -414,6 +421,7 @@ script = ExtResource("10_en45s")
 
 [connection signal="unit_selected_signal" from="." to="ModeMachine/Default" method="_on_main_unit_selected_signal"]
 [connection signal="unit_selected_signal" from="." to="ModeMachine/Target" method="_on_main_unit_selected_signal"]
+[connection signal="finished" from="SoundtrackPlayer" to="SoundtrackPlayer" method="_on_finished"]
 [connection signal="pressed" from="UI/GameUI/BottomPanel/Control/Actions/Item" to="." method="_on_item_pressed"]
 [connection signal="pressed" from="UI/GameUI/RightPanel/EndTurn" to="." method="_on_end_turn_pressed"]
 [connection signal="pressed" from="UI/GameUI/RightPanel/EndTurn" to="TurnControl" method="_on_end_turn_pressed"]
