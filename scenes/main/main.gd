@@ -1,9 +1,9 @@
 extends Node2D
 
 @onready var MODE = get_node("ModeMachine/Default")
-@onready var UnitPanel = get_node("UI/GameUI/BottomPanel")
 @onready var LOG = get_node("UI/GameUI/RightPanel/GameLog")
 @onready var UNITSCENE = preload("res://scenes/unit/unit.tscn")
+@onready var UNIT_PANEL = get_node("UI/GameUI/BottomPanel")
 #Tile Map Layers
 @onready var GROUND = get_node("TileMap/Ground")
 @onready var OBSTACLES = get_node("TileMap/Obstacles")
@@ -18,6 +18,7 @@ var mapSize : Vector2i = Vector2i(36, 20)
 var spawnSize : Vector2i = Vector2i(6, 5)
 var team_arrays : Array[Array] = [[],[],[]]
 var spawn_arrays : Array[Array] = [[],[],[]]
+var player_controlled_teams : Array[int] = [gv.Team.BLUE]
 
 var active_unit : Unit = null
 
@@ -48,8 +49,8 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
-			
-			MODE._input_mouse_click(event.button_index,collider_info , mouse_tm_pos)
+			if(is_players_turn()):
+				MODE._input_mouse_click(event.button_index,collider_info , mouse_tm_pos)
 			
 			var alt = 1
 			if(collider_info.size() > 0): alt = 2
@@ -96,12 +97,13 @@ func unit_selected(unit : Unit = null):
 	if(unit != null):
 		if(unit.action_points == 0 or unit.team != $TurnControl.current_turn): 
 			unit = null
+			$SelectedLabel.hide()
 		else:
 			$SelectedLabel.show()
 	else:
 		$SelectedLabel.hide() 
 	active_unit = unit
-	UnitPanel.update_panel(unit)
+	UNIT_PANEL.update_panel(unit)
 	MODE = get_node("ModeMachine/Default")
 	emit_signal("unit_selected_signal", active_unit)
 	reset_mode()
@@ -174,7 +176,7 @@ func astargrid_set_walls():
 
 func _on_action_finished(state : bool = true):
 	set_process_unhandled_input(state)
-	UnitPanel.update_panel(active_unit)
+	UNIT_PANEL.update_panel(active_unit)
 func _on_end_turn_pressed():
 	unit_selected()
 	$SelectedLabel.hide()
@@ -200,3 +202,6 @@ func _on_item_pressed():
 
 func get_tm_layer(layer : int = 0) -> TileMapLayer:
 	return $TileMap.get_child(layer)
+
+func is_players_turn() -> bool:
+	return player_controlled_teams.find($TurnControl.current_turn) != -1

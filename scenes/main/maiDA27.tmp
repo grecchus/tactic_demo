@@ -1,8 +1,7 @@
-[gd_scene load_steps=18 format=4 uid="uid://ldg8yah0ymws"]
+[gd_scene load_steps=17 format=4 uid="uid://ldg8yah0ymws"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_o5l1d"]
 [ext_resource type="Texture2D" uid="uid://bpx7iqeb74hhb" path="res://textures/tilemaps/terrainTilemap.png" id="1_y3yfu"]
-[ext_resource type="Script" path="res://scenes/main/ai.gd" id="2_ag2ej"]
 [ext_resource type="AudioStream" uid="uid://ctoq753m0bl6e" path="res://SFX/synth (1).wav" id="2_v88ib"]
 [ext_resource type="Script" path="res://scenes/main/soundtrack_player.gd" id="3_fu2bx"]
 [ext_resource type="Script" path="res://scenes/main/turn_control.gd" id="3_psmhk"]
@@ -187,9 +186,6 @@ region = Rect2(64, 0, 64, 64)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_o5l1d")
-
-[node name="AI" type="Node" parent="."]
-script = ExtResource("2_ag2ej")
 
 [node name="SoundtrackPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_v88ib")
