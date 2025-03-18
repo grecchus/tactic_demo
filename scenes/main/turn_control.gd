@@ -2,10 +2,11 @@ extends Node
 
 var turn_counter : int = 1
 var current_turn : int = gv.Team.NEUTRAL
-
+signal next_turn_signal
 
 
 func next_turn():
+	emit_signal("next_turn_signal")
 	if(current_turn == gv.Team.RED): 
 		turn_counter += 1
 		current_turn = 0
@@ -22,3 +23,4 @@ func next_turn():
 func _on_end_turn_pressed():
 	if(get_parent().is_players_turn()):
 		next_turn()
+		
