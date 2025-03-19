@@ -6,7 +6,6 @@ signal next_turn_signal
 
 
 func next_turn():
-	emit_signal("next_turn_signal")
 	if(current_turn == gv.Team.RED): 
 		turn_counter += 1
 		current_turn = 0
@@ -14,6 +13,7 @@ func next_turn():
 		while(get_parent().team_arrays[current_turn].size() == 0):
 			current_turn += 1
 	else: current_turn += 1
+	emit_signal("next_turn_signal")
 	
 	for unit in get_parent().team_arrays[current_turn]:
 		unit.action_points = unit.max_ap

@@ -43,6 +43,7 @@ func _process(delta):
 	if(active_unit != null):
 		$SelectedLabel.global_position = active_unit.global_position - $SelectedLabel.size/2
 		$SelectedLabel.text = "AP: " + str(active_unit.action_points)
+	$UI/GameUI/TurnDisplay.text = "Current turn: " + str($TurnControl.current_turn)
 
 func _unhandled_input(event):
 	var mouse_tm_pos = GROUND.local_to_map(get_global_mouse_position())
