@@ -154,6 +154,7 @@ func check_point_for_collision(coords : Vector2i):
 	var query = PhysicsPointQueryParameters2D.new()
 	query.position = tm_to_global_position(coords)
 	return space.intersect_point(query)
+
 func _draw():
 	var color = Color("ffff00") #yellow
 	for i in draw_path.size() - 1:
