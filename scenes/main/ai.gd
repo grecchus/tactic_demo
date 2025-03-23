@@ -48,7 +48,7 @@ func make_move(u : Unit):
 	var effective_range : float = 0.0
 	if(u.weapon == gv.Weapon.ARMED):
 		effective_range = u.weapon_obj.effective_range
-	find_nearby_enemies(GROUND.local_to_map(u.global_position), effective_range)
+	find_closest_enemies(GROUND.tm_local_to_map(u.global_position))
 	
 
 #move functions
@@ -67,15 +67,8 @@ func find_flank():
 func fall_back():
 	pass
 
-func find_nearby_enemies(unit_position : Vector2i, range : float = 0.0):
-	var space = MAIN.get_world_2d().direct_space_state
-	var nx = 0
-	var ny = 0
-	for ray in floori(90.0/rd):
-		var query = PhysicsRayQueryParameters2D
-		query.from = unit_position
-		query.to = Vector2(
-			float(unit_position.x) + range * cos(deg_to_rad(0)),
-			float(unit_position.y) + range * sin(deg_to_rad(0)),
-			)
-		print(space.intersect_ray(query))
+func find_closest_enemies(unit_position : Vector2) -> Array[Unit]:
+	return []
+
+func find_enemies_in_range(unit_position : Vector2, range: float) -> Array[Unit]:
+	return []
