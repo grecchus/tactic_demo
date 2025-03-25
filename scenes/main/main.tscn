@@ -444,6 +444,7 @@ vertical_alignment = 1
 [connection signal="unit_selected_signal" from="." to="ModeMachine/Default" method="_on_main_unit_selected_signal"]
 [connection signal="unit_selected_signal" from="." to="ModeMachine/Target" method="_on_main_unit_selected_signal"]
 [connection signal="finished" from="SoundtrackPlayer" to="SoundtrackPlayer" method="_on_finished"]
+[connection signal="next_turn_signal" from="TurnControl" to="AI" method="_on_next_turn_signal"]
 [connection signal="pressed" from="UI/GameUI/BottomPanel/Control/Actions/Item" to="." method="_on_item_pressed"]
 [connection signal="pressed" from="UI/GameUI/RightPanel/EndTurn" to="." method="_on_end_turn_pressed"]
 [connection signal="pressed" from="UI/GameUI/RightPanel/EndTurn" to="TurnControl" method="_on_end_turn_pressed"]

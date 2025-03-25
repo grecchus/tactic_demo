@@ -38,6 +38,7 @@ func _ready():
 	astargrid_set_walls()
 	gv.log_updated.connect(LOG._on_log_updated)
 	new_game()
+	print("ready")
 
 func _process(delta):
 	if(active_unit != null):

@@ -13,11 +13,11 @@ func next_turn():
 		while(get_parent().team_arrays[current_turn].size() == 0):
 			current_turn += 1
 	else: current_turn += 1
-	emit_signal("next_turn_signal")
 	
 	for unit in get_parent().team_arrays[current_turn]:
 		unit.action_points = unit.max_ap
 	get_parent().UNIT_PANEL.update_panel()
+	emit_signal("next_turn_signal")
 
 
 func _on_end_turn_pressed():
