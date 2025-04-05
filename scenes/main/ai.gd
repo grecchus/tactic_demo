@@ -8,8 +8,7 @@ extends Node
 @onready var GROUND = get_node("/root/Main/TileMap/Ground")
 @onready var OBSTACLES = get_node("/root/Main/TileMap/Obstacles")
 
-#ray degree difference
-var rd : float = 10.0
+var tile_eff_range : float = 0.0
 
 #Red team is default AI controlled team
 var controlled_teams : Array[int] = [gv.Team.RED]
@@ -42,11 +41,19 @@ func make_move(u : Unit):
 	var enemies_in_range : Array[Unit] = []
 	var movement_range : int = 6
 	var effective_range : float = 0.0
+	var nccount : int = 0
+	
 	if(u.weapon == gv.Weapon.ARMED):
-		effective_range = u.weapon_obj.effective_range
+		effective_range = u.weapon_obj.rpm
+		effective_range = 25.0/effective_range * MAIN.TSD 
 	closest_enemies.assign(find_closest_enemies())
 	enemies_in_range.assign(find_enemies_in_range(closest_enemies, pow(effective_range,2)))
-	print(enemies_in_range)
+	
+	for un in enemies_in_range:
+		if(not is_behind_cover(current_unit, un)):
+			nccount += 1
+	if(nccount > 0):
+		find_cover()
 
 
 #move functions
@@ -65,11 +72,20 @@ func find_flank():
 func fall_back():
 	pass
 
+func is_behind_cover(u_start : Unit, u_target : Unit) -> bool:
+	var u_start_pos = GROUND.local_to_map(u_start.global_position)
+	var u_target_pos = GROUND.local_to_map(u_target.global_position)
+	var objects_on_lof : Array
+	objects_on_lof.assign(get_objects_on_lof(u_start_pos, u_target_pos, u_start))
+	if(int(get_distance(objects_on_lof[0], u_start_pos)) == 1):
+		return true
+	return false
 
 func find_closest_enemies() -> Array[Unit]:
 	var closest_units : Array[Unit]  
 	
-	closest_units.assign(MAIN.team_arrays[TURN_CONTROL.current_turn])
+	for t in MAIN.player_controlled_teams:
+		closest_units.append_array(MAIN.team_arrays[t])
 	closest_units.sort_custom(comp_dist)
 	return closest_units
 
@@ -98,3 +114,34 @@ func comp_dist(u1 : Unit, u2 : Unit) -> bool:
 		)
 	return id_path_1.size() < id_path_2.size()
 	
+
+func get_objects_on_lof(start_pos : Vector2i, end_pos : Vector2i, unit : Unit) -> Array:
+	var object_tile_array : Array = []
+	var space = MAIN.get_world_2d().direct_space_state
+	var excluded_rids : Array[RID] = [unit.get_rid()]
+	while(start_pos != end_pos):
+		var query = PhysicsRayQueryParameters2D.new()
+		var intersected_object : Dictionary
+		query.collide_with_areas = true
+		query.exclude = excluded_rids
+		query.from = MAIN.tm_to_global_position(start_pos)
+		query.to = MAIN.tm_to_global_position(end_pos)
+		
+		intersected_object = space.intersect_ray(query)
+		
+		if(intersected_object.size() > 0):
+			var obj_rid : RID = intersected_object["rid"]
+			excluded_rids.append(obj_rid)
+			if(intersected_object["collider"] is TileMapLayer): 
+				var atl_coords = OBSTACLES.get_cell_atlas_coords(OBSTACLES.get_coords_for_body_rid(obj_rid))
+				object_tile_array.append(OBSTACLES.get_coords_for_body_rid(obj_rid))
+				#Sprawdza czy pole jest sciana. sciany maja indeksy y od 2 do 3, poki co ic nie ma wiecej
+				if(atl_coords.y == 2 || atl_coords.y == 3): break
+		else: break
+	
+	return object_tile_array
+
+func get_distance(start_pos : Vector2i, end_pos : Vector2i) -> float:
+	return Vector2i(end_pos - start_pos).length()
+
+#komentarz - mowienie nic nie daje

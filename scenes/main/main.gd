@@ -13,7 +13,8 @@ var grid_offset := Vector2.ZERO
 enum TILE{DEFAULT, HOVERED, CLICKED}
 enum TILE_MAP_LAYER{GROUND, OBSTACLES}
 
-const TILESIZE := Vector2(64.0, 64.0)
+const TSD := float(64.0)
+const TILESIZE := Vector2(TSD, TSD)
 var mapSize : Vector2i = Vector2i(36, 20)
 var spawnSize : Vector2i = Vector2i(6, 5)
 var team_arrays : Array[Array] = [[],[],[]]
@@ -38,7 +39,6 @@ func _ready():
 	astargrid_set_walls()
 	gv.log_updated.connect(LOG._on_log_updated)
 	new_game()
-	print("ready")
 
 func _process(delta):
 	if(active_unit != null):

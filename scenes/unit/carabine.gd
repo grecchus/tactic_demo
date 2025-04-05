@@ -5,7 +5,7 @@ var rng = RandomNumberGenerator.new()
 
 
 func _init():
-	effective_range = 5.0
+	rpm = 5.0
 	cursor = "reticle"
 	main = gv.MainNodeAccess
 	Ground = main.get_tm_layer(0)
@@ -54,13 +54,13 @@ func get_distance(start_pos : Vector2i, end_pos : Vector2i) -> float:
 func fire(shooter_pos : Vector2i, target_pos : Vector2i):
 	var distance_to_target : float = get_distance(shooter_pos, target_pos)
 	var objects_on_lof : Array = get_objects_on_lof(shooter_pos, target_pos)
-	var chance_to_hit : float = clamp(100.0 - effective_range * distance_to_target, 0.0, 100.0)
+	var chance_to_hit : float = clamp(100.0 - rpm * distance_to_target, 0.0, 100.0)
 	var target_unit = get_target(target_pos)
 	rng.randomize()
 	
 	for obj in objects_on_lof:
 		if(obj != target_pos and obj != objects_on_lof.back()):
-			if(roll_for_hit((100.0 - effective_range * get_distance(shooter_pos, obj))*0.2)):
+			if(roll_for_hit((100.0 - rpm * get_distance(shooter_pos, obj))*0.2)):
 				gv.cprint("Hit at: " + str(obj))
 				var new_target = get_target(obj)
 				if(new_target != null): new_target.take_damage(1)
@@ -77,7 +77,6 @@ func fire(shooter_pos : Vector2i, target_pos : Vector2i):
 
 func roll_for_hit(hit_chance : float) -> bool:
 	return randf_range(0.0, 1.0) <= hit_chance/100.0
-
 
 func get_target(coords : Vector2i) -> Unit:
 	var col_arr = main.check_point_for_collision(coords)
