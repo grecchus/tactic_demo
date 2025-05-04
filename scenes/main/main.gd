@@ -51,6 +51,7 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
+			check_radius(mouse_tm_pos, 3)
 			if(is_players_turn()):
 				MODE._input_mouse_click(event.button_index,collider_info , mouse_tm_pos)
 			
@@ -166,6 +167,28 @@ func _draw():
 		var p2 : Vector2 = GROUND.map_to_local(draw_path[i+1])
 		draw_line(p1, p2, color)
 
+func check_radius(starting_coords : Vector2i, range : int, exclude_center : bool = false) -> Array:
+	const xy_diff : Array[Vector2i] = [Vector2i(1,1),Vector2i(1,-1),Vector2i(-1,-1),Vector2i(-1,1)]
+	var objects_found : Array = []
+	var res : Array = []
+	
+	if(range < 0): return []
+	if(not exclude_center):
+		res = check_point_for_collision(starting_coords)
+		if(not res.is_empty()):
+			objects_found.append(res)
+	
+	while(range > 0):
+		var next_pos = starting_coords - Vector2i(range, 0)
+		for i in 4:
+			for j in range:
+				res = check_point_for_collision(next_pos)
+				if(not res.is_empty()):
+					objects_found.append(res)
+				next_pos += xy_diff[i]
+		range -= 1
+	print(objects_found)
+	return objects_found
 
 func tm_to_global_position(tm_pos : Vector2i) -> Vector2:
 	return Vector2(tm_pos) * TILESIZE + TILESIZE/2
@@ -208,3 +231,6 @@ func get_tm_layer(layer : int = 0) -> TileMapLayer:
 
 func is_players_turn() -> bool:
 	return player_controlled_teams.find($TurnControl.current_turn) != -1
+
+#UNION - takie same ilości kolumn - kompatybilność,
+#typy danych zwracanych kolumn (albo przeszukiwanych) muszą być takie same

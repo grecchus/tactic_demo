@@ -20,6 +20,7 @@ var max_ap : int = 2
 var health_points : int = 3
 var max_hp : int = 3
 
+var movement_range : int = 6
 var movement_speed : float = 20.0
 
 signal action_finished(state : bool)
@@ -70,8 +71,8 @@ func find_path(coords : Vector2i) -> int:
 		tilemap.local_to_map(global_position),
 		coords
 		) 
-	id_path = new_id_path.slice(1, action_points*6+1)
-	movement_cost = ceili(float(id_path.size()) / 6.0)
+	id_path = new_id_path.slice(1, action_points*movement_range+1)
+	movement_cost = ceili(float(id_path.size()) / float(movement_range))
 	return movement_cost
 
 func _on_action_started(action_cost : int = 1, is_continuous_action : bool = true) -> void:

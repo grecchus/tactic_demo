@@ -39,7 +39,7 @@ func take_turn():
 func make_move(u : Unit):
 	var closest_enemies : Array[Unit] = []
 	var enemies_in_range : Array[Unit] = []
-	var movement_range : int = 6
+	var movement_range : int = u.movement_range
 	var effective_range : float = 0.0
 	var nccount : int = 0
 	
@@ -49,16 +49,20 @@ func make_move(u : Unit):
 	closest_enemies.assign(find_closest_enemies())
 	enemies_in_range.assign(find_enemies_in_range(closest_enemies, pow(effective_range,2)))
 	
-	for un in enemies_in_range:
-		if(not is_behind_cover(current_unit, un)):
-			nccount += 1
-	if(nccount > 0):
-		find_cover()
-
+	find_cover(u, movement_range, enemies_in_range)
 
 #move functions
-func find_cover():
-	pass
+func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit]):
+	var covers_in_range : Array[Vector2i] = []
+	var objects_array = MAIN.check_radius(GROUND.local_to_map(acting_unit),
+		 search_range,
+		 true)
+	
+	for ob in objects_array:
+		if(ob["collider"] is TileMapLayer):
+			covers_in_range
+	
+	
 
 func find_target():
 	pass
@@ -72,6 +76,7 @@ func find_flank():
 func fall_back():
 	pass
 
+#check if unit is behind cover relative to other given (enemy) unit
 func is_behind_cover(u_start : Unit, u_target : Unit) -> bool:
 	var u_start_pos = GROUND.local_to_map(u_start.global_position)
 	var u_target_pos = GROUND.local_to_map(u_target.global_position)
@@ -143,5 +148,3 @@ func get_objects_on_lof(start_pos : Vector2i, end_pos : Vector2i, unit : Unit) -
 
 func get_distance(start_pos : Vector2i, end_pos : Vector2i) -> float:
 	return Vector2i(end_pos - start_pos).length()
-
-#komentarz - mowienie nic nie daje
