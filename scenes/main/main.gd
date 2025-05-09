@@ -51,9 +51,10 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
-			check_radius(mouse_tm_pos, 3)
+			#print(mouse_tm_pos)
+			#print(check_radius(mouse_tm_pos,3))
 			if(is_players_turn()):
-				MODE._input_mouse_click(event.button_index,collider_info , mouse_tm_pos)
+				MODE._input_mouse_click(event.button_index, collider_info, mouse_tm_pos)
 			
 			var alt = 1
 			if(collider_info.size() > 0): alt = 2
@@ -187,7 +188,6 @@ func check_radius(starting_coords : Vector2i, range : int, exclude_center : bool
 					objects_found.append(res)
 				next_pos += xy_diff[i]
 		range -= 1
-	print(objects_found)
 	return objects_found
 
 func tm_to_global_position(tm_pos : Vector2i) -> Vector2:
