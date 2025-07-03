@@ -51,7 +51,7 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
-			#print(mouse_tm_pos)
+			print(mouse_tm_pos)
 			#print(check_radius(mouse_tm_pos,3))
 			if(is_players_turn()):
 				MODE._input_mouse_click(event.button_index, collider_info, mouse_tm_pos)
@@ -231,6 +231,3 @@ func get_tm_layer(layer : int = 0) -> TileMapLayer:
 
 func is_players_turn() -> bool:
 	return player_controlled_teams.find($TurnControl.current_turn) != -1
-
-#UNION - takie same ilości kolumn - kompatybilność,
-#typy danych zwracanych kolumn (albo przeszukiwanych) muszą być takie same

@@ -11,15 +11,15 @@ extends Node
 const adjacent_tiles : Array = [Vector2i(-1,0), Vector2i(0,-1), Vector2i(1,0), Vector2i(0,1)]
 var tile_eff_range : float = 0.0
 
-#Red team is default AI controlled team
-var controlled_teams : Array[int] = [gv.Team.RED]
+
+var controlled_teams : Array[int] = [gv.Team.RED] #Red team is default AI controlled team
 var unit_queue : Array = []
 #AI behaviour patterns for given teams
 var ai_pattern_dict : Dictionary = {
 	gv.Team.RED : "Agressive"
 }
 var current_unit : Unit = null
-var ucount : int = 0
+var ucount : int = 0 #Global variable used in determining cover safety
 var closest_enemies : Array[Unit] = []
 
 
@@ -55,10 +55,11 @@ func make_move(u : Unit):
 	enemies_in_range.assign(find_enemies_in_range(closest_enemies, effective_range))
 	
 	new_cover = find_cover(u, movement_range, enemies_in_range, effective_range)
+	print(new_cover)
+	print(u.unit_class_str)
 	
 	if(new_cover != unit_pos):
 		u.action(new_cover)
-		print("dziala")
 
 #move functions
 func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], weapon_range : float) -> Vector2i:
@@ -71,7 +72,7 @@ func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], 
 	for enemy in in_range:
 		if(not is_behind_cover(unit_pos,
 			GROUND.local_to_map(acting_unit.global_position))): uc_min += 1
-	if(uc_min == 0): return unit_pos
+	#if(uc_min == 0): return unit_pos
 	
 	objects_array = MAIN.check_radius(GROUND.local_to_map(acting_unit.global_position),
 		 search_range,
@@ -88,10 +89,9 @@ func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], 
 		elif(uc_min > ucount):
 			uc_min = ucount
 			found_cover = cover_side_pos
-			
 	return found_cover
-	
-#function checking cover for safety
+
+#Function checking cover for safety. Returns safest side of the cover and it's unit count with ucount global variable.
 func cover_safety(cover_pos : Vector2i, u : Unit, unit_range : int, weapon_range : float) -> Vector2i:
 	var uc_min : int = closest_enemies.size()
 	var best_side : Vector2i = cover_pos
@@ -107,7 +107,6 @@ func cover_safety(cover_pos : Vector2i, u : Unit, unit_range : int, weapon_range
 				if(uc_min > ucount):
 					uc_min = ucount
 					best_side = cover_pos + i
-	
 	ucount = uc_min
 	return best_side
 
@@ -127,7 +126,8 @@ func fall_back():
 func is_behind_cover(u_start : Vector2i, u_target : Vector2i) -> bool:
 	var objects_on_lof : Array
 	objects_on_lof.assign(get_objects_on_lof(u_start, u_target))
-	if(int(get_distance(objects_on_lof[0], u_start)) == 1):
+	if(objects_on_lof.is_empty()): return false
+	if(int(get_distance(objects_on_lof.front(), u_start)) == 1):
 		return true
 	return false
 
