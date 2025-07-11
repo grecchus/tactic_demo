@@ -1,18 +1,13 @@
 extends Node
 
-var turn_counter : int = 1
 var current_turn : int = gv.Team.NEUTRAL
 signal next_turn_signal
 
 
 func next_turn():
-	if(current_turn == gv.Team.RED): 
-		turn_counter += 1
-		current_turn = 0
-		#do zmiany dla reszty druzyn
-		while(get_parent().team_arrays[current_turn].size() == 0):
-			current_turn += 1
-	else: current_turn += 1
+	current_turn = (current_turn + 1) % get_parent().team_arrays.size()
+	while(get_parent().team_arrays[current_turn].size() == 0):
+		current_turn = (current_turn + 1) % get_parent().team_arrays.size()
 	
 	for unit in get_parent().team_arrays[current_turn]:
 		unit.action_points = unit.max_ap

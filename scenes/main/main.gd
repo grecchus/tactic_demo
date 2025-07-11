@@ -15,6 +15,7 @@ enum TILE_MAP_LAYER{GROUND, OBSTACLES}
 
 const TSD := float(64.0)
 const TILESIZE := Vector2(TSD, TSD)
+const nonexistent_tile := Vector2i(-1,-1)
 var mapSize : Vector2i = Vector2i(36, 20)
 var spawnSize : Vector2i = Vector2i(6, 5)
 var team_arrays : Array[Array] = [[],[],[]]
@@ -51,7 +52,8 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
-			print(mouse_tm_pos)
+			gv.cprint(mouse_tm_pos)
+			#gv.cprint(astar_grid.is_point_solid(mouse_tm_pos))
 			#print(check_radius(mouse_tm_pos,3))
 			if(is_players_turn()):
 				MODE._input_mouse_click(event.button_index, collider_info, mouse_tm_pos)
@@ -149,6 +151,7 @@ func spawn_unit(new_unit : Unit):
 			next_pos.x = 0
 			next_pos.y += 1
 		spawn_pos = init_spawn_pos + next_pos * next_pos_sign
+	set_tile_occupied(spawn_pos, spawn_pos)
 
 
 #utility
@@ -192,17 +195,27 @@ func check_radius(starting_coords : Vector2i, range : int, exclude_center : bool
 
 func tm_to_global_position(tm_pos : Vector2i) -> Vector2:
 	return Vector2(tm_pos) * TILESIZE + TILESIZE/2
+
 #setup
 func astargrid_set_walls():
 	for y in mapSize.y:
 		for x in mapSize.x:
-			if(OBSTACLES.get_cell_atlas_coords(Vector2i(x,y)) != Vector2i(-1,-1)):
+			if(OBSTACLES.get_cell_atlas_coords(Vector2i(x,y)) != nonexistent_tile):
 				astar_grid.set_point_solid(Vector2i(x,y))
 
+func set_tile_occupied(prev_pos : Vector2i, curr_pos : Vector2i):
+	astar_grid.set_point_solid(curr_pos)
+	if(prev_pos != curr_pos):
+		astar_grid.set_point_solid(prev_pos, false)
+func free_tile(pos : Vector2i):
+	astar_grid.set_point_solid(pos, false)
 
-func _on_action_finished(state : bool = true):
+
+func _on_action_finished(state : bool = true) -> void:
+	if(not is_players_turn()): return
 	set_process_unhandled_input(state)
 	UNIT_PANEL.update_panel(active_unit)
+	
 func _on_end_turn_pressed():
 	unit_selected()
 	$SelectedLabel.hide()

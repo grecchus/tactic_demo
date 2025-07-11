@@ -16,68 +16,130 @@ var controlled_teams : Array[int] = [gv.Team.RED] #Red team is default AI contro
 var unit_queue : Array = []
 #AI behaviour patterns for given teams
 var ai_pattern_dict : Dictionary = {
-	gv.Team.RED : "Agressive"
+	gv.Team.RED : "Defensive"
 }
 var current_unit : Unit = null
 var ucount : int = 0 #Global variable used in determining cover safety
 var closest_enemies : Array[Unit] = []
 
+signal unit_finished_movement
+
 
 func _on_next_turn_signal():
-	if(controlled_teams.find(TURN_CONTROL.current_turn,0) != -1):
+	if(controlled_teams.find(TURN_CONTROL.current_turn) != -1):
 		unit_queue.assign(MAIN.team_arrays[TURN_CONTROL.current_turn])
 		take_turn()
 
 func take_turn():
+	print("turn started")
+	var stuck_units : Array = []
+	var iterations_stuck : int = 0
 	while(not unit_queue.is_empty()):
 		current_unit = unit_queue[0]
 		make_move(current_unit)
+		if(current_unit.id_path.is_empty()):
+			unit_queue.append(current_unit)
+			if(stuck_units.find(current_unit) == -1):
+				stuck_units.append(current_unit)
+		else:
+			stuck_units.erase(current_unit)
+			await current_unit.action_finished
 		unit_queue.remove_at(0)
-		
-#	On queue empty, end turn
-	make_move(current_unit)
+		if(stuck_units.size() == unit_queue.size()): #simple deadlock preventing mechanism
+			if(iterations_stuck > stuck_units.size()): break
+			iterations_stuck += 1
+		else: iterations_stuck = 0
+	print("turn ended")
 	TURN_CONTROL.next_turn()
 
-#MAKE STATE MACHINE
-#TEMPLATE MOVE PATTERN
+
 func make_move(u : Unit):
 	var unit_pos : Vector2i = GROUND.local_to_map(u.global_position)
 	var enemies_in_range : Array[Unit] = []
 	var movement_range : int = u.movement_range
-	var effective_range : float = 0.0
-	var ucount : int = 0
-	var new_cover : Vector2i = Vector2i.ZERO
+	var effective_range : float = 5.0
+	ucount = 0
+#checking state unit is in at every while iteration
+#state = R*4 + C*2 + A*1
+#R - has enemy in it's weapon range, that
+#C - is behind cover
+#A - unit has more than 1 action point to spend
+	#while(u.action_points > 0):
+	var state : int = 0
+	state += int(u.action_points == 1)
 	
 	if(u.weapon == gv.Weapon.ARMED):
 		effective_range = u.weapon_obj.rpm
-		effective_range = 25.0/effective_range * MAIN.TSD 
+	effective_range = effective_range * MAIN.TSD
 	closest_enemies.assign(find_closest_enemies())
 	enemies_in_range.assign(find_enemies_in_range(closest_enemies, effective_range))
+	state += int(enemies_in_range.size() > 0) * 2
+	if(not enemies_in_range.is_empty()): gv.cprint(str(enemies_in_range) + " " + str(unit_pos))
 	
-	new_cover = find_cover(u, movement_range, enemies_in_range, effective_range)
-	print(new_cover)
-	print(u.unit_class_str)
+	for enemy in enemies_in_range:
+		if(not is_behind_cover(unit_pos,
+			GROUND.local_to_map(enemy.global_position))): ucount += 1
+	state += int(ucount > 0) * 4
 	
-	if(new_cover != unit_pos):
-		u.action(new_cover)
+	if(find_cover(u, movement_range, enemies_in_range, effective_range)):
+		await u.action_finished
+		#match state:
+			#0:
+				#pass
+			#1: 
+				#find_cover(u, movement_range, enemies_in_range, effective_range)
+			#2:
+				#pass
+			#3:
+				#pass
+			#4:
+				#pass
+			#5:
+				#find_cover(u, movement_range, enemies_in_range, effective_range)
+			#6:
+				#pass
+			#7:
+				#pass
+	emit_signal("unit_finished_movement")
 
-#move functions
-func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], weapon_range : float) -> Vector2i:
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% move functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#find cover facing opposite to spawnpoint, used when there are no enemies in range
+func find_cover_ots(acting_unit : Unit, search_range : int) -> bool:
+	var covers_in_range : Array[Vector2i] = []
+	var objects_array
+	return false
+#	use adjecent_tiles
+	objects_array = MAIN.check_radius(GROUND.local_to_map(acting_unit.global_position),
+		 search_range,
+		 true)
+	for sub_arr in objects_array:
+		for ob in sub_arr:
+			if(ob["collider"] is TileMapLayer):
+				covers_in_range.append(ob["collider"].get_coords_for_body_rid(ob["rid"]))
+#!!!!!!!!!!TO DO!!!!!!!!!!!
+
+
+#Funkcja zwraca NAJGORSZĄ z opcji!!!!!!!!!!
+#find cover when there are enemies in range
+func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], weapon_range : float) -> bool:
 	var unit_pos : Vector2i = GROUND.local_to_map(acting_unit.global_position)
 	var covers_in_range : Array[Vector2i] = []
 	var objects_array
 	var uc_min : int = 0
-	var found_cover : Vector2i = Vector2i.ZERO
+	var found_cover : Vector2i = unit_pos
 	
 	for enemy in in_range:
 		if(not is_behind_cover(unit_pos,
-			GROUND.local_to_map(acting_unit.global_position))): uc_min += 1
-	#if(uc_min == 0): return unit_pos
-	
+			GROUND.local_to_map(enemy.global_position))):
+				uc_min += 1
+				print(str(unit_pos) + str(uc_min) + str(acting_unit.name))
+	#if(uc_min == 0): return false                      
+		
 	objects_array = MAIN.check_radius(GROUND.local_to_map(acting_unit.global_position),
 		 search_range,
 		 true)
-		
 	for sub_arr in objects_array:
 		for ob in sub_arr:
 			if(ob["collider"] is TileMapLayer):
@@ -85,11 +147,19 @@ func find_cover(acting_unit : Unit, search_range : int, in_range : Array[Unit], 
 				
 	for cover in covers_in_range:
 		var cover_side_pos = cover_safety(cover, acting_unit, search_range, weapon_range)
-		if(ucount == 0): return cover_side_pos
+		print(str(cover_side_pos) + " " + str(ucount))
+		if(ucount == 0):
+			found_cover = cover_side_pos
+			break
 		elif(uc_min > ucount):
 			uc_min = ucount
 			found_cover = cover_side_pos
-	return found_cover
+	
+	acting_unit.current_action = "Move"
+	acting_unit.action(found_cover)
+	if(acting_unit.id_path.is_empty()):
+		return false
+	return true
 
 #Function checking cover for safety. Returns safest side of the cover and it's unit count with ucount global variable.
 func cover_safety(cover_pos : Vector2i, u : Unit, unit_range : int, weapon_range : float) -> Vector2i:
@@ -99,14 +169,15 @@ func cover_safety(cover_pos : Vector2i, u : Unit, unit_range : int, weapon_range
 	var range_sqrd = pow(weapon_range,2)
 	
 	for i in adjacent_tiles:
+		if(MAIN.check_point_for_collision(cover_pos + i)): continue
 		ucount = 0
 		if(u.find_path(cover_pos + i) < 2):
 			for enemy in closest_enemies:
 				if((enemy.global_position - u.global_position).length_squared() <= range_sqrd):
 					if(not is_behind_cover(cover_pos, GROUND.local_to_map(enemy.global_position))): ucount += 1
-				if(uc_min > ucount):
-					uc_min = ucount
-					best_side = cover_pos + i
+			if(uc_min > ucount):
+				uc_min = ucount
+				best_side = cover_pos + i
 	ucount = uc_min
 	return best_side
 
@@ -114,9 +185,6 @@ func find_target():
 	pass
 
 func move():
-	pass
-
-func find_flank():
 	pass
 
 func fall_back():
@@ -138,7 +206,7 @@ func find_closest_enemies() -> Array[Unit]:
 		closest_units.append_array(MAIN.team_arrays[t])
 	closest_units.sort_custom(comp_dist)
 	return closest_units
-
+#tutaj chyba jest błąd!!!, jeżeli to nie zadziała, przepisz wszystko
 func find_enemies_in_range(sorted_unit_array : Array[Unit], range: float) -> Array[Unit]:
 	var in_range : Array[Unit] = []
 	var i = 0
@@ -153,6 +221,19 @@ func find_enemies_in_range(sorted_unit_array : Array[Unit], range: float) -> Arr
 	return in_range
 
 func comp_dist(u1 : Unit, u2 : Unit) -> bool:
+	var dist_1 : float
+	var dist_2 : float
+	dist_1 = get_distance(
+		current_unit.global_position,
+		u1.global_position
+		)
+	dist_2 = get_distance(
+		current_unit.global_position,
+		u2.global_position
+		)
+	return dist_1 < dist_2
+
+func comp_dist_path(u1 : Unit, u2 : Unit) -> bool:
 	var id_path_1
 	var id_path_2
 	id_path_1 = MAIN.astar_grid.get_id_path(
@@ -186,7 +267,7 @@ func get_objects_on_lof(start_pos : Vector2i, end_pos : Vector2i) -> Array:
 			if(intersected_object["collider"] is TileMapLayer): 
 				var atl_coords = OBSTACLES.get_cell_atlas_coords(OBSTACLES.get_coords_for_body_rid(obj_rid))
 				object_tile_array.append(OBSTACLES.get_coords_for_body_rid(obj_rid))
-				#Sprawdza czy pole jest sciana. sciany maja indeksy y od 2 do 3, poki co ic nie ma wiecej
+				#Sprawdza czy pole jest sciana. sciany maja indeksy y od 2 do 3, poki co nic nie ma wiecej
 				if(atl_coords.y == 2 || atl_coords.y == 3): break
 		else: break
 	

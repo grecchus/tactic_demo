@@ -23,12 +23,16 @@ var max_hp : int = 3
 var movement_range : int = 6
 var movement_speed : float = 20.0
 
+#for detecting if unit moved after taking an action
+var prev_pos : Vector2
+
 signal action_finished(state : bool)
 
 func _ready():
 	unit_class = get_node("UnitClass/"+unit_class_str)
 	set_sheet_index()
 	get_item(weapon)
+	prev_pos = self.global_position
 
 func _process(delta):
 	if(id_path.is_empty()): return
@@ -41,7 +45,9 @@ func _process(delta):
 		if(main.active_unit == self):
 			main.draw_path = id_path
 			main.queue_redraw()
-		if(id_path.is_empty()): emit_signal("action_finished", true)
+		if(id_path.is_empty()):
+			emit_signal("action_finished", true)
+			if(prev_pos != self.global_position): main.set_tile_occupied(tilemap.local_to_map(prev_pos), tilemap.local_to_map(self.global_position))
 
 
 func action(arg = null):
@@ -70,7 +76,7 @@ func find_path(coords : Vector2i) -> int:
 	var new_id_path = main.astar_grid.get_id_path(
 		tilemap.local_to_map(global_position),
 		coords
-		) 
+		)
 	id_path = new_id_path.slice(1, action_points*movement_range+1)
 	movement_cost = ceili(float(id_path.size()) / float(movement_range))
 	return movement_cost
@@ -81,11 +87,13 @@ func _on_action_started(action_cost : int = 1, is_continuous_action : bool = tru
 		main.unit_selected()
 	if(is_continuous_action):
 		emit_signal("action_finished", false)
+		prev_pos = self.global_position
 
 func take_damage(damage : int):
 	health_points = clamp(health_points - damage, 0, max_hp)
 	if(health_points == 0): 
 		main.team_arrays[team].erase(self)
+		main.free_tile(tilemap.local_to_map(self.global_position))
 		queue_free()
 
 func play_sound(sound : AudioStreamWAV = null):
