@@ -9,8 +9,8 @@ var cursor : String = ""
 var owner_unit : Unit = null
 var use_sound : AudioStreamWAV = AudioStreamWAV.new()
 
-#range penalty multiplier
-var rpm : float = 0.0
+#range penalty multiplier, determines how chance to hit decreases with distance
+var rpm = 6.0
 
 func _use_item(coords : Vector2i = Vector2i.ZERO):
 	pass

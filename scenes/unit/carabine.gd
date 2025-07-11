@@ -5,7 +5,7 @@ var rng = RandomNumberGenerator.new()
 
 
 func _init():
-	rpm = 5.0
+	rpm = 6.0
 	cursor = "reticle"
 	main = gv.MainNodeAccess
 	Ground = main.get_tm_layer(0)

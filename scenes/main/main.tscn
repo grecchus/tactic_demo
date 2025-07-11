@@ -1,16 +1,14 @@
-[gd_scene load_steps=20 format=4 uid="uid://ldg8yah0ymws"]
+[gd_scene load_steps=18 format=4 uid="uid://ldg8yah0ymws"]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_o5l1d"]
 [ext_resource type="Texture2D" uid="uid://bpx7iqeb74hhb" path="res://textures/tilemaps/terrainTilemap.png" id="1_y3yfu"]
 [ext_resource type="Script" path="res://scenes/main/ai.gd" id="2_ag2ej"]
 [ext_resource type="AudioStream" uid="uid://ctoq753m0bl6e" path="res://SFX/synth (1).wav" id="2_v88ib"]
-[ext_resource type="Script" path="res://scenes/main/aggressive.gd" id="3_2ialf"]
 [ext_resource type="Script" path="res://scenes/main/soundtrack_player.gd" id="3_fu2bx"]
 [ext_resource type="Script" path="res://scenes/main/turn_control.gd" id="3_psmhk"]
 [ext_resource type="Script" path="res://scenes/main/Default.gd" id="4_4ffe0"]
 [ext_resource type="Texture2D" uid="uid://l4w07tfhdute" path="res://textures/spriteSheet.png" id="4_hr8wi"]
 [ext_resource type="Script" path="res://scenes/main/BottomPanel.gd" id="4_ir2k3"]
-[ext_resource type="Script" path="res://scenes/main/defensive.gd" id="4_nu6ps"]
 [ext_resource type="Script" path="res://scenes/main/Target.gd" id="5_6iugl"]
 [ext_resource type="Script" path="res://scenes/main/Actions.gd" id="5_n77y6"]
 [ext_resource type="Texture2D" uid="uid://cxworrgk53uec" path="res://textures/item_sheet.png" id="7_judtp"]
@@ -192,12 +190,6 @@ script = ExtResource("1_o5l1d")
 
 [node name="AI" type="Node" parent="."]
 script = ExtResource("2_ag2ej")
-
-[node name="Aggressive" type="Node" parent="AI"]
-script = ExtResource("3_2ialf")
-
-[node name="Defensive" type="Node" parent="AI"]
-script = ExtResource("4_nu6ps")
 
 [node name="SoundtrackPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_v88ib")
