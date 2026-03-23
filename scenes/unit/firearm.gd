@@ -1,15 +1,24 @@
-class_name Carabine
+class_name Firearm
 extends Item
 
-var rng = RandomNumberGenerator.new()
-
+var rng := RandomNumberGenerator.new()
+var rpm : float
+var min_damage : int
+var max_damage : int
 
 func _init():
+<<<<<<< Updated upstream:scenes/unit/carabine.gd
 	rpm = 5.0
 	cursor = "reticle"
+=======
+>>>>>>> Stashed changes:scenes/unit/firearm.gd
 	main = gv.MainNodeAccess
 	Ground = main.get_tm_layer(0)
 	Obstacles = main.get_tm_layer(1)
+	cursor = "reticle"
+	rpm = 6.0
+	min_damage = 1
+	max_damage = 2
 	use_sound = load("res://SFX/carabine_shot.wav")
 
 func _use_item(coords : Vector2i = Vector2i.ZERO):
@@ -50,26 +59,29 @@ func get_distance(start_pos : Vector2i, end_pos : Vector2i) -> float:
 	
 #function calls main's function checking for collision at given tile, then checks whether are there any Unit class objects. If so, return that first unit in array
 
-
+#CRITICAL - NEEDS A REWRITE
 func fire(shooter_pos : Vector2i, target_pos : Vector2i):
 	var distance_to_target : float = get_distance(shooter_pos, target_pos)
 	var objects_on_lof : Array = get_objects_on_lof(shooter_pos, target_pos)
 	var chance_to_hit : float = clamp(100.0 - rpm * distance_to_target, 0.0, 100.0)
 	var target_unit = get_target(target_pos)
+	var target_in_between : Unit
 	rng.randomize()
 	
 	for obj in objects_on_lof:
 		if(obj != target_pos and obj != objects_on_lof.back()):
-			if(roll_for_hit((100.0 - rpm * get_distance(shooter_pos, obj))*0.2)):
+			if(roll_for_hit(clamp((100.0 - rpm * get_distance(shooter_pos, obj))*0.2, 0.0, 100.0))): # targets in line of fire can also be hit
 				gv.cprint("Hit at: " + str(obj))
-				var new_target = get_target(obj)
-				if(new_target != null): new_target.take_damage(1)
+				target_in_between = get_target(obj)
+				if(target_in_between != null): target_in_between.take_damage(
+					clamp(rng.randi_range(min_damage, max_damage)-1, 1, max_damage)
+					)
 				return
-			if(int(get_distance(obj, target_pos)) == 1): chance_to_hit *= 0.7
+			if(int(get_distance(obj, target_pos)) == 1): chance_to_hit *= 0.7 #target is behind cover
 		elif(obj == target_pos): 
 			if(roll_for_hit(chance_to_hit)):
 				gv.cprint("Target hit at: " + str(chance_to_hit) + "%")
-				if(target_unit != null): target_unit.take_damage(2)
+				if(target_unit != null): target_unit.take_damage(rng.randi_range(min_damage, max_damage))
 				return 
 			else: gv.cprint("Target missed!")
 		#TO BE CHANGED!!!
@@ -77,6 +89,16 @@ func fire(shooter_pos : Vector2i, target_pos : Vector2i):
 
 func roll_for_hit(hit_chance : float) -> bool:
 	return randf_range(0.0, 1.0) <= hit_chance/100.0
+
+func get_chance(shooter_pos : Vector2i, target_pos : Vector2i) -> float:
+	var distance_to_target : float = get_distance(shooter_pos, target_pos)
+	var chance = clamp(100.0 - rpm * distance_to_target, 0.0, 100.0)
+	var objects_on_lof : Array = get_objects_on_lof(shooter_pos, target_pos)
+	for obj in objects_on_lof:
+		if(obj != target_pos and obj != objects_on_lof.back()):
+			if(int(get_distance(obj, target_pos)) == 1): chance *= 0.7
+		elif(Obstacles.get_cell_atlas_coords(obj).y >= 2): chance = 0.0
+	return chance
 
 func get_target(coords : Vector2i) -> Unit:
 	var col_arr = main.check_point_for_collision(coords)

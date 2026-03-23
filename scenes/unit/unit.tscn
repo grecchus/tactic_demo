@@ -1,10 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://cl31ohlye2c1u"]
+[gd_scene load_steps=6 format=3 uid="uid://cl31ohlye2c1u"]
 
 [ext_resource type="Script" path="res://scenes/unit/Unit.gd" id="1_ekfed"]
 [ext_resource type="Texture2D" uid="uid://l4w07tfhdute" path="res://textures/spriteSheet.png" id="2_1od2w"]
-[ext_resource type="Script" path="res://scenes/unit/Soldier.gd" id="3_m1ra3"]
-[ext_resource type="Script" path="res://scenes/unit/Officer.gd" id="4_jbqja"]
-[ext_resource type="Script" path="res://scenes/unit/Medic.gd" id="5_sf2bu"]
 [ext_resource type="Script" path="res://scenes/unit/move.gd" id="6_rgxfi"]
 [ext_resource type="Script" path="res://scenes/unit/use.gd" id="7_453ct"]
 
@@ -21,17 +18,6 @@ shape = SubResource("RectangleShape2D_ga5rc")
 texture = ExtResource("2_1od2w")
 hframes = 8
 vframes = 8
-
-[node name="UnitClass" type="Node" parent="."]
-
-[node name="Soldier" type="Node" parent="UnitClass"]
-script = ExtResource("3_m1ra3")
-
-[node name="Officer" type="Node" parent="UnitClass"]
-script = ExtResource("4_jbqja")
-
-[node name="Medic" type="Node" parent="UnitClass"]
-script = ExtResource("5_sf2bu")
 
 [node name="State" type="Node" parent="."]
 

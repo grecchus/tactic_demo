@@ -1,0 +1,55 @@
+{
+  "Soldier" : {
+	"item" : "assault_rifle",
+	"action_points" : 2,
+	"health_points" : 3,
+	"movement_range" : 6,
+	"sprite_sheet_coord" : 0,
+	"ai" : [
+		["move_forward"],
+		["find_cover"],
+		["move_forward"],
+		["wait"],
+		["find_cover"],
+		["find_cover"],
+		["find_target"],
+		["find_target"]
+		]
+  },
+
+  "Officer" : {
+	"item" : "assault_rifle",
+	"action_points" : 3,
+	"health_points" : 4,
+	"movement_range" : 6,
+	"sprite_sheet_coord" : 2,
+	"ai" : [
+		["move_forward"],
+		["find_cover"],
+		["move_forward"],
+		["wait"],
+		["find_cover"],
+		["find_cover"],
+		["find_target"],
+		["find_target"]
+		]
+  },
+
+  "Medic" : {
+	"item" : "medkit",
+	"action_points" : 2,
+	"health_points" : 3,
+	"movement_range" : 7,
+	"sprite_sheet_coord" : 4,
+	"ai" : [
+		["wait"],
+		["wait"],
+		["wait"],
+		["wait"],
+		["wait"],
+		["wait"],
+		["wait"],
+		["wait"]
+		]
+  }
+}

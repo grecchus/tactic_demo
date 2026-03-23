@@ -9,8 +9,11 @@ var cursor : String = ""
 var owner_unit : Unit = null
 var use_sound : AudioStreamWAV = AudioStreamWAV.new()
 
+<<<<<<< Updated upstream
 #range penalty multiplier
 var rpm : float = 0.0
 
+=======
+>>>>>>> Stashed changes
 func _use_item(coords : Vector2i = Vector2i.ZERO):
 	pass
