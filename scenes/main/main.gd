@@ -15,9 +15,9 @@ enum TILE_MAP_LAYER{GROUND, OBSTACLES}
 
 const TSD := float(64.0)
 const TILESIZE := Vector2(TSD, TSD)
+const xy_diff : Array[Vector2i] = [Vector2i(1,1),Vector2i(1,-1),Vector2i(-1,-1),Vector2i(-1,1)]
 const nonexistent_tile := Vector2i(-1,-1)
 var mapSize : Vector2i = Vector2i(36, 20)
-var mapCenter : Vector2i
 var spawnSize : Vector2i = Vector2i(6, 5)
 var team_arrays : Array[Array] = [[],[],[]]
 var spawn_arrays : Array[Array] = [[],[],[]]
@@ -34,7 +34,6 @@ signal unit_selected_signal(unit : Unit)
 #main functions
 func _ready():
 	gv.MainNodeAccess = self
-	gv.parse_json_data()
 	astar_grid.region = GROUND.get_used_rect()
 	astar_grid.cell_size = TILESIZE
 	astar_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
@@ -42,11 +41,7 @@ func _ready():
 	astargrid_set_walls()
 	gv.log_updated.connect(LOG._on_log_updated)
 	new_game()
-<<<<<<< Updated upstream
-=======
-	mapCenter = mapSize/2
 	$AI.assign_enemies()
->>>>>>> Stashed changes
 
 func _process(delta):
 	if(active_unit != null):
@@ -59,14 +54,9 @@ func _unhandled_input(event):
 	if(event is InputEventMouseButton):
 		if(event.pressed):
 			var collider_info = check_point_for_collision(mouse_tm_pos)
-			#gv.cprint(mouse_tm_pos)
+			gv.cprint(mouse_tm_pos)
 			#gv.cprint(astar_grid.is_point_solid(mouse_tm_pos))
-<<<<<<< Updated upstream
-			#print(check_radius(mouse_tm_pos,3))
-=======
 			#gv.cprint(check_radius(mouse_tm_pos,2))
-			#gv.cprint(find_empty_tiles_in_radius(mouse_tm_pos,1))
->>>>>>> Stashed changes
 			if(is_players_turn()):
 				MODE._input_mouse_click(event.button_index, collider_info, mouse_tm_pos)
 			
@@ -183,30 +173,12 @@ func _draw():
 		var p2 : Vector2 = GROUND.map_to_local(draw_path[i+1])
 		draw_line(p1, p2, color)
 
-<<<<<<< Updated upstream
-func check_radius(starting_coords : Vector2i, range : int, exclude_center : bool = false) -> Array:
-	const xy_diff : Array[Vector2i] = [Vector2i(1,1),Vector2i(1,-1),Vector2i(-1,-1),Vector2i(-1,1)]
+func check_radius(starting_coords : Vector2i, r : int, exclude_center : bool = false) -> Array:
 	var objects_found : Array = []
-	var res : Array = []
 	
-	if(range < 0): return []
+	
 	if(not exclude_center):
-		res = check_point_for_collision(starting_coords)
-		if(not res.is_empty()):
-			objects_found.append(res)
-	
-	while(range > 0):
-		var next_pos = starting_coords - Vector2i(range, 0)
-		for i in 4:
-			for j in range:
-				res = check_point_for_collision(next_pos)
-				if(not res.is_empty()):
-					objects_found.append(res)
-				next_pos += xy_diff[i]
-		range -= 1
-=======
-func check_radius(starting_coords : Vector2i, r : int) -> Array:
-	var objects_found : Array = []
+		objects_found = check_point_for_collision(starting_coords)
 		
 	var x := 0
 	var y := -r
@@ -226,36 +198,13 @@ func check_radius(starting_coords : Vector2i, r : int) -> Array:
 			for fx in range (0, x+1):
 				append_objects_array(objects_found, starting_coords + Vector2i(y,fx)*i)
 		x+=1
->>>>>>> Stashed changes
 	return objects_found
-	
 
-func find_empty_tiles_in_radius(starting_coords : Vector2i, r : int) -> Array[Vector2i]:
-	var empty_tiles : Array[Vector2i] = []
-		
-	var x := 0
-	var y := -r
-	var p := -r
-	while(x < -y):
-		if(p > 0):
-			y+=1
-			p += 2*(x+y) + 1
-		else:
-			p += 2*x + 1
-			
-		for i in xy_diff:
-			if(check_point_for_collision(starting_coords + Vector2i(x,y)*i).is_empty() and not empty_tiles.has(starting_coords + Vector2i(x,y)*i)):
-				empty_tiles.append(starting_coords + Vector2i(x,y)*i)
-			for fy in range (0, abs(y)+1):
-				if(check_point_for_collision(starting_coords + Vector2i(x,fy)*i).is_empty() and not empty_tiles.has(starting_coords + Vector2i(x,fy)*i)):
-					empty_tiles.append(starting_coords + Vector2i(x,fy)*i)
-			if(check_point_for_collision(starting_coords + Vector2i(y,x)*i).is_empty() and not empty_tiles.has(starting_coords + Vector2i(y,x)*i)):
-				empty_tiles.append(starting_coords + Vector2i(y,x)*i)
-			for fx in range (0, x+1):
-				if(check_point_for_collision(starting_coords + Vector2i(y,fx)*i).is_empty() and not empty_tiles.has(starting_coords + Vector2i(y,fx)*i)):
-					empty_tiles.append(starting_coords + Vector2i(y,fx)*i)
-		x+=1
-	return empty_tiles
+func append_objects_array(ob_array : Array, coords : Vector2i):
+	var res : Array
+	res = check_point_for_collision(coords)
+	for ob in res:
+		if(not ob_array.has(ob)): ob_array.append(ob)
 
 func tm_to_global_position(tm_pos : Vector2i) -> Vector2:
 	return Vector2(tm_pos) * TILESIZE + TILESIZE/2
@@ -280,7 +229,6 @@ func _on_action_finished(state : bool = true) -> void:
 	set_process_unhandled_input(state)
 	UNIT_PANEL.update_panel(active_unit)
 	
-
 func _on_end_turn_pressed():
 	unit_selected()
 	$SelectedLabel.hide()
